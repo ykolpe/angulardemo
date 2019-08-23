@@ -1,0 +1,170 @@
+<h2>
+	{{title}}
+	<small *ngIf="loading"><i class="fa fa-spin fa-life-ring"></i><span class="sr-only">Loading...</span></small>
+</h2>
+<div class="card">
+	<div class="card-block">
+		<button type="button" class="btn btn-secondary" (click)="newRule(addrulecontent)">New Rule</button>
+		<button type="button" class="btn btn-secondary" (click)="showFilter = !showFilter">
+			<i class="fa" [ngClass]="{'fa-caret-right': !showFilter,  'fa-caret-down': showFilter}"></i> Filter
+		</button>
+		<span *ngIf="!showFilter && (filter.ruleName  != '' || filter.createdBy != '' || filter.status.length > 0)"> <b>Filter By:</b></span>
+		<span *ngIf="!showFilter && (filter.ruleName != '')">Rule Name = {{filter.ruleName}};</span>
+		<span *ngIf="!showFilter && (filter.createdBy != '')">Created By = {{filter.createdBy}};</span>
+		<span *ngIf="!showFilter && (filter.status.length > 0)">Status = {{filter.status}}</span>
+		<div class="card-block" *ngIf="showFilter">
+			<div class="form-group row">
+				<label for="example-text-input" class="col-2 col-form-label text-right">Rule Name:</label>
+				<div class="col-4">
+					<input class="form-control" type="text" [(ngModel)]="filter.ruleName" placeholder="e.g. P90203.10.000" id="ruleName">
+				</div>
+			</div>
+			<div class="form-group row">
+				<label for="example-text-input" class="col-2 col-form-label text-right">Created By:<small *ngIf="loadingCreators"><i class="fa fa-spin fa-life-ring"></i><span class="sr-only">Loading...</span></small></label>
+				<div class="col-4">
+					<select class="form-control" id="cbcreators" name="cbcreators" [ngClass]="{'text-danger': selectedUser != '' && creators.length == 0}"
+							[ngModel]="selectedUser" (ngModelChange)="changeUser($event)">
+						<option value="" *ngIf="creators.length > 0">- Select from users list -</option>
+						<option value="" *ngIf="creators.length == 0">- No users returned -</option>
+						<option *ngFor="let creator of creators" [value]="creator._createdBy">{{creator._createdBy}}</option>
+					</select>
+				</div>
+			</div>
+			<div class="form-group row">
+				<label for="example-text-input" class="col-2 col-form-label text-right">Status:</label>
+				<div class="col-4">
+					<div class="btn-group" data-toggle="buttons">
+						<label class="btn" [ngClass]="{'btn-primary': filter.status.includes('unapproved'), 'btn-secondary':!filter.status.includes('unapproved')}"><input type="checkbox" (click)="toggleStatus('unapproved')">Unapproved</label>
+						<label class="btn" [ngClass]="{'btn-primary': filter.status.includes('approved'), 'btn-secondary': !filter.status.includes('approved')}"><input type="checkbox" (click)="toggleStatus('approved')">Approved</label>
+						<label class="btn" [ngClass]="{'btn-primary': filter.status.includes('archived'), 'btn-secondary': !filter.status.includes('archived')}"><input type="checkbox" (click)="toggleStatus('archived')">Archived</label>
+					</div>
+				</div>
+			</div>
+			<div class="form-group row">
+				<label for="example-text-input" class="col-2 col-form-label text-right"></label>
+				<div class="col-4">
+					<button class="btn btn-primary" (click)="applyFilter()">Search</button>
+					<button class="btn btn-secondary" (click)="cancelFilter()">Clear</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="card-block">
+		<label for="power">Rules <small *ngIf="loadingRules"><i class="fa fa-spin fa-life-ring"></i><span class="sr-only">Loading...</span></small></label>
+		<table class="table table-condensed table-striped table-hover table-responsive">
+			<thead class="blue-grey lighten-4">
+				<tr>
+					<th *ngFor="let column of columns">
+						<a role="button" (click)="changeSort(column.field)">{{column.label}}</a>
+						<!--<i class="fa" [ngClass]="{'fa-angle-up': pageable.sort.orders[0].direction == 'asc' && pageable.sort.orders[0].property == column.field, 'fa-angle-down': pageable.sort.orders[0].direction == 'desc'  && pageable.sort.orders[0].property == column.field}"></i>-->
+					</th>
+					<th>
+						Edit
+					</th>
+					<th>
+						Delete
+					</th>
+					<th>
+						Action
+					</th>
+					<th>
+						Validate
+					</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr *ngFor="let rule of ruleHeaders  | paginate : { itemsPerPage:10, currentPage: p, totalItems: totalItems } ">
+					<td>{{rule.RuleName}}</td>
+					<td>{{rule.CreatedDate | date: 'shortDate'}}</td>
+					<td>{{rule.Status}}</td>
+					<td>{{rule.CreatedBy}}</td>
+					<td><button type="button" class="btn btn-secondary btn-sm" (click)="edit(rule)">Edit</button></td>
+					<td><button type="button" class="btn btn-secondary btn-sm" (click)="delete(rule)">Delete</button></td>
+					<td *ngIf="this.Groups.indexOf('ICAP Rule Administrator') > -1"><button type="button" class="btn btn-secondary btn-sm" (click)="action(rule)">{{rule.ActionText}}</button></td>
+					<td><button type="button" class="btn btn-secondary btn-sm" (click)="validate(rule)">Validate</button></td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+	<div>
+		<pagination-controls (pageChange)="p = getServerData($event)"></pagination-controls>
+		<!--<ng-pagination [position]="'Left'" [pageSize]="10" [itemsCount]="ruleHeaders.length" [data]="ruleHeaders" class="pagination-sm"></ng-pagination>-->
+	</div>
+	<!--<div class="card-block">
+		<div class="row">
+			<div class="col-6">
+				<nav aria-label="Page navigation example">
+					<ul class="pagination">
+						<li class="page-item" [ngClass]="{'disabled': table.page.first}"><a class="page-link" (click)="!table.page.first && changePageNumber(0)"><i class="fa fa-angle-double-left"></i></a></li>
+						<li class="page-item" [ngClass]="{'disabled': table.page.first}"><a class="page-link" (click)="!table.page.first && changePageNumber(table.page.number - 1)"><i class="fa fa-angle-left"></i></a></li>
+						<li class="page-item disabled"><a class="page-link">{{table.page.number + 1}} / {{table.page.totalPages}}</a></li>
+						<li class="page-item" [ngClass]="{'disabled': table.page.last}"><a class="page-link" (click)="!table.page.last && changePageNumber(table.page.number + 1)"><i class="fa fa-angle-right"></i></a></li>
+						<li class="page-item" [ngClass]="{'disabled': table.page.last}"><a class="page-link" (click)="!table.page.last && changePageNumber(table.page.totalPages - 1)"><i class="fa fa-angle-double-right"></i></a></li>
+						<li class="page-item disabled"> <span class="page-link">{{table.page.totalElements}} rules</span> </li>
+					</ul>
+				</nav>
+			</div>
+			<div class="col-6 row">
+				<label class="offset-6 col-3  col-form-label text-right" for="PageSize">Page Size</label>
+				<div class="col-3">
+					<select class="form-control" name="pageSize" [ngModel]="table.page.size" (ngModelChange)="changePageSize($event)">
+						<option *ngFor="let pSize of table.pageSizes" [ngValue]="pSize">{{pSize}}</option>
+					</select>
+				</div>
+			</div>
+		</div>
+	</div>-->
+</div>
+<ng-template #addrulecontent let-s="close" let-d="dismiss">
+
+	<div class="modal-header">
+		<h4 class="modal-title">New Rule</h4>
+	</div>
+	
+		<div class="modal-body">
+			<div class="form-group">
+				<label class="col-form-label">Rule Name:</label>
+				<div>
+					<input class="form-control" type="text" required [(ngModel)]="addRule.RuleName" id="ruleName" #ruleName="ngModel">
+				</div>
+				<div *ngIf="ruleName.errors && (ruleName.dirty || ruleName.touched)" class="alert alert-danger">
+					<div [hidden]="!ruleName.errors.required">
+						Rule Name is required!
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-form-label">Description:</label>
+					<div>
+						<textarea class="form-control" type="text" required [(ngModel)]="addRule.RuleDescription" id="description" #description="ngModel"></textarea>
+					</div>
+					<div *ngIf="description.errors && (description.dirty || description.touched)" class="alert alert-danger">
+						<div [hidden]="!description.errors.required">
+							Description is required!
+						</div>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-form-label ">Justification</label>
+					<div>
+						<textarea class="form-control" type="text" required [(ngModel)]="addRule.Justification" id="justification" #justification="ngModel"></textarea>
+					</div>
+					<div *ngIf="justification.errors && (justification.dirty || justification.touched)" class="alert alert-danger">
+						<div [hidden]="!justification.errors.required">
+							Justification is required!
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="modal-footer">
+			<button type="submit" class="btn btn-primary btn-success" [disabled]="ruleName.invalid || justification.invalid ||description.invalid" (click)="s('newRule click')">Save</button>
+			<button type="button" class="btn btn-secondary" (click)="d('Close click')">Cancel</button>
+		</div>
+	
+</ng-template>
+
+
+
+
+
+

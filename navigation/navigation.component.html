@@ -1,0 +1,23 @@
+﻿
+<nav id="STNavigation" class="navbar navbar-toggleable-md nav-pills bg-faded">
+    <ul class="nav">
+        <li class="nav-item">
+            <a class="nav-link" [routerLink]="['/home']" [routerLinkActive]="['active']">Overview</a>
+        </li>
+        <li class="nav-item" *ngIf="this.Groups.indexOf('ICAP Project Controls') > -1">
+            <a class="nav-link" [routerLink]="['/project-controls']" [routerLinkActive]="['active']">Project Controls</a>
+        </li>
+        <li class="nav-item" *ngIf="this.Groups.indexOf('ICAP Accounts Payable') > -1">
+            <a class="nav-link" [routerLink]="['/accounts-payable']" [routerLinkActive]="['active']">Accounts Payable</a>
+        </li>
+        <li class="nav-item" *ngIf="this.Groups.indexOf('ICAP Contracts') > -1">
+            <a class="nav-link" [routerLink]="['/contracts-list']" [routerLinkActive]="['active']">Contracts</a>
+        </li>
+        <li class="nav-item" *ngIf="(this.Groups.indexOf('ICAP Project Controls') > -1) || (this.Groups.indexOf('ICAP Rule Administrator') > -1) ">
+            <a class="nav-link" [routerLink]="['/rule-change-review']" [routerLinkActive]="['active']">Rule Change Review</a>
+        </li>
+        <li class="nav-item" *ngIf="(this.Groups.indexOf('ICAP Rule Administrator') > -1) || (this.Groups.indexOf('ICAP Project Controls') > -1) ">
+            <a class="nav-link" [routerLink]="['/rules-search']" [routerLinkActive]="['active']">Rules Administration</a>
+        </li>
+    </ul>
+</nav>

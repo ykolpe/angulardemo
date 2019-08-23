@@ -1,0 +1,25 @@
+<table class="table table-condensed table-striped">
+  <thead>
+    <tr>
+      <th>Rule Name</th>
+      <th>Created Date</th>
+      <th>Status</th>
+      <th>Created By</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let rule of table.page.content">
+      <td>{{rule.ruleName}}</td>
+      <td>{{rule.createdDate}}</td>
+      <td>{{rule.status}}</td>
+      <td>{{rule.createBy}}</td>
+      <td>
+        <button type="button" class="btn btn-secondary" (click)="edit(rule)">Edit</button>
+        <button type="button" class="btn btn-secondary" (click)="delete(rule)">Delete</button>
+        <button type="button" class="btn btn-secondary" (click)="archive(rule)">Archive</button>
+        <button type="button" class="btn btn-secondary" (click)="validate(rule)">Validate</button>
+      </td>
+    </tr>
+  </tbody>
+</table>

@@ -1,0 +1,86 @@
+<h2>
+  {{title}}
+</h2>
+<div class="col-4 form-group" style="display:inline-block">
+  <label for="power">Project List <small *ngIf="loadingProjects"><i class="fa fa-life-ring fa-spin fa-3x"></i><span class="sr-only">Loading...</span></small></label>
+  <select class="form-control" id="project" [ngModel]="selectedProject" (ngModelChange)="changeProject($event)" name="project">
+  <option value="">- Select From project list -</option>
+    <option *ngFor="let project of projects" [value]="project.ProjectNumber">{{project.ProjectNumber}}</option>
+  </select>
+</div>
+<div class="col-lg-8 form-group" style="display:inline-block;float:right;padding-top:30px">
+	<label> Unifier Project: {{contractRecord.ProjectNumber}}</label><br />
+	<label> Unifier Contract Name: {{contractRecord.ContractNumber}}</label><br />
+	<label> EnterpriseOne PO Number: {{contractRecord.EOnePONumber}}</label><br />
+	<label> EnterpriseOne Req Number: {{contractRecord.EOneReqNumber}}</label><br />
+</div>
+	<div class="col-lg-4 form-group">
+		<label for="power">Contract List <small *ngIf="loadingContracts"><i class="fa fa-spin fa-life-ring"></i><span class="sr-only">Loading...</span></small></label>
+		<select class="form-control" id="contract" name="contract" [ngClass]="{'text-danger': selectedProject != '' && contracts.length == 0}"
+				[ngModel]="selectedContract" (ngModelChange)="changeContract($event)" [disabled]="!selectedProject">
+			<option value="" *ngIf="contracts.length > 0">- Select From contract list -</option>
+			<option value="" *ngIf="contracts.length == 0">- No items for this project -</option>
+			<option *ngFor="let contract of contracts" [value]="contract.ContractNumber">{{contract.ContractNumber}}</option>
+		</select>
+	</div>
+	
+
+	<div class="col-12" *ngIf="selectedErrors?.length > 0">
+	  <ngb-alert [type]="'danger'" (close)="closeErrors()">
+		<ul>
+		  <li *ngFor="let err of selectedErrors">{{err}}</li>
+		</ul>
+	  </ngb-alert>
+	</div>
+	<div *ngFor="let alert of alerts" class="{{ cssClass(alert) }} alert-dismissable">
+		{{alert.message}}
+		<a class="close" (click)="removeAlert(alert)">&times;</a>
+	</div>
+	<div class="col-12">
+	  <label for="power">Transactions <small *ngIf="loadingTransactions"><i class="fa fa-spin fa-life-ring"></i><span class="sr-only">Loading...</span></small></label>
+	  <table class="table table-condensed table-striped table-hover table-responsive">
+		<thead>
+		  <tr>
+			<th *ngFor="let column of columns" [ngClass]="column.styleClass">
+			  <a role="button" (click)="changeSort(column.field)">{{column.label}}</a>
+			  <i class="fa" [ngClass]="{'fa-angle-up': sortOrder.direction == 'asc' && sortOrder.property == column.field, 'fa-angle-down': sortOrder.direction == 'desc'  && sortOrder.property == column.field}"></i>
+			</th>
+			<th></th>
+		  </tr>
+		</thead>
+		<tbody>
+		  <tr *ngIf="selectedContract != '' && transactions.length == 0">
+			<td colspan="11">
+			  <h3>No transaction defined for this contract.</h3>
+			</td>
+		  </tr>
+		  <tr *ngFor="let trx of transactions; let i = index">
+			<td>{{trx.TransactionType}}</td>
+			<td>{{trx.TransactionNumber}}</td>
+			<td>{{trx.ContractTitle}}</td>
+			<td>{{trx.Status}}</td>
+			<td>{{trx.CreateDate | date: 'shortDate'}}</td>
+			<td class="text-right" >{{trx.ContractAmount | currency:'USD':true }}</td>
+			<td class="text-right" >{{trx.ContingencyAmount | currency:'USD':true }}</td>
+			<td class="text-right" >{{trx.TotalAmount | currency:'USD':true }}</td>
+			<td style="display:none;">{{trx.trueIndex}}</td>
+			<!--<td>{{trx.TrueIndex}}</td>-->
+		<td>
+			<button type="button" [disabled]="!trx.IsPrintEnabled" class="btn btn-secondary btn-sm btn-link" (click)="print(i, trx)" [class.active]="i == selectedRow">Print</button>
+			<ng-template #tipContent>{{trx.ErrorsButtonTooltip}}</ng-template>
+			<button type="button" [disabled]="!trx.IsErrorsButtonEnabled" class="btn btn-secondary btn-sm btn-link" (click)="errors(i, trx)" [class.active]="i == selectedRow" placement="bottom" [ngbTooltip]="tipContent">Errors</button>
+			<button type="button" [disabled]="!trx.IsRevalidateEnabled" class="btn btn-secondary btn-sm btn-link" (click)="revalidate(i, trx)" [class.active]="i == selectedRow">Revalidate</button>
+		</td>
+		</tr>
+		</tbody>
+		</table>
+		<div class="row">
+			<div class="col-6">
+				<nav aria-label="Page navigation example">
+					<ul class="pagination">
+						<li class="page-item disabled"> <span class="page-link">{{transactions.length}} rows</span> </li>
+					</ul>
+				</nav>
+			</div>
+		</div>
+	</div>

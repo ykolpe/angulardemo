@@ -1,0 +1,81 @@
+﻿<h2>
+    {{title}}
+    <small *ngIf="loading"><i class="fa fa-spin fa-life-ring"></i><span class="sr-only">Loading...</span></small>
+</h2>
+<table class="table table-condensed table-striped table-hover table-responsive">
+    <thead>
+        <tr>
+            <th *ngFor="let column of columns" [ngClass]="column.styleClass">
+                <a role="button" (click)="changeSort(column.field)">{{column.label}}</a>
+                <i class="fa" [ngClass]="{'fa-angle-up': sortOrder.direction == 'asc' && sortOrder.property == column.field, 'fa-angle-down': sortOrder.direction == 'desc'  && sortOrder.property == column.field}"></i>
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr *ngIf="showError">
+            <td colspan="9">
+                <h3>Transactions currently unavailable.</h3>
+            </td>
+        </tr>
+        <tr *ngFor="let account of accountsPayable | paginate : { itemsPerPage:10, currentPage: p, totalItems: totalItems } ">
+            <td>{{account.GLDate | date: 'shortDate'}}</td>
+            <td>{{account.PoNumber}}</td>
+            <td>{{account.ContractNumber}}</td>
+            <td>{{account.VendorInvoiceNumber}}</td>
+            <td>{{account.VendorNumber}}</td>
+            <td>{{account.Description}}</td>
+            <td>{{account.Status}}</td>
+            <td class="text-right" [ngClass]="{ 'text-danger' : account.TotalAmount < 0 }">{{account.TotalAmount | currency:'USD':true }}</td>
+            <td>
+                <button type="button" class="btn btn-secondary btn-sm btn-link" (click)="edit(content, account)">Edit</button>
+                <button type="button" class="btn btn-secondary btn-sm btn-link" (click)="viewReport(account)">View Report</button>
+                <button type="button" class="btn btn-secondary btn-sm btn-link" (click)="sendToEone(account)">Send To E1</button>
+            </td>
+        </tr>
+    </tbody>
+</table>
+<div class="row">
+    <div>
+        <pagination-controls (pageChange)="p = getServerData($event)"></pagination-controls>
+    </div>
+    <!--<div class="col-6">
+        <nav aria-label="Page navigation example">
+            <ul class="pagination">
+                <li class="page-item disabled"> <span class="page-link">{{accountsPayable.length}} rows</span> </li>
+            </ul>
+        </nav>
+    </div>-->
+</div>
+<ng-template #content let-c="close" let-d="dismiss">
+    <div class="modal-header">
+        <h4 class="modal-title">Edit {{selectedAccountsPayable.PoNumber}}</h4>
+    </div>
+    <div class="modal-body">
+        <div class="form-group">
+            <label class="col-form-label ">PO Number</label>
+            <div>
+                <input class="form-control" disabled="true" [ngModel]="selectedAccountsPayable.PoNumber">
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-form-label ">Contract Number</label>
+            <div>
+                <input class="form-control" disabled="true" [ngModel]="selectedAccountsPayable.ContractNumber">
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-form-label ">GL Date</label>
+            <div class="input-group">
+                <input autofocus class="form-control" placeholder="yyyy-mm-dd" [(ngModel)]="gldate" ngbDatepicker #dp="ngbDatepicker">
+                <button class="input-group-addon" (click)="dp.toggle()" type="button">
+                    <i class="fa fa-calendar"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-primary" (click)="c('edit click')">Update</button>
+        <button type="button" class="btn btn-secondary" (click)="d('Close click')">Cancel</button>
+    </div>
+</ng-template>

@@ -1,0 +1,48 @@
+<div class="modal-header">
+    <h4 class="modal-title">Edit Rule Detail</h4>
+    <button type="button" class="close" aria-label="Close" (click)="activeModal.dismiss('Cross click')">
+        <span aria-hidden="true">&times;</span>
+      </button>
+</div>
+<div class="modal-body">
+    <div class="form-group row">
+        <label for="example-text-input" class="col-4 col-form-label text-right">Business Unit:</label>
+        <div class="col-8">
+            <input class="form-control" type="text" [(ngModel)]="ruleDetail.mcu" id="ruleName">
+        </div>
+    </div>
+    <div class="form-group row">
+        <label for="example-text-input" class="col-4 col-form-label text-right">Object:</label>
+        <div class="col-8">
+            <input class="form-control" type="text" [(ngModel)]="ruleDetail.object" id="object">
+        </div>
+    </div>
+    <div class="form-group row">
+        <label for="example-text-input" class="col-4 col-form-label text-right">Phase/WF:</label>
+        <div class="col-8">
+            <input class="form-control" type="text" [(ngModel)]="ruleDetail.sub" id="phaseWF">
+        </div>
+    </div>
+    <div class="form-group row">
+        <label for="example-text-input" class="col-4 col-form-label text-right">Asset ID:</label>
+        <div class="col-8">
+            <input class="form-control" type="text" [(ngModel)]="ruleDetail.assetID" id="assetID">
+        </div>
+    </div>
+    <div class="form-group row">
+        <label for="example-text-input" class="col-4 col-form-label text-right">Grant ID:</label>
+        <div class="col-8">
+            <input class="form-control" type="text" [(ngModel)]="ruleDetail.subLedger" id="subLedger">
+        </div>
+    </div>
+    <div class="form-group row">
+        <label for="example-text-input" class="col-4 col-form-label text-right">Created By:</label>
+        <div class="col-8">
+            <input class="form-control" type="number" [(ngModel)]="ruleDetail.percentage" id="percentage">
+        </div>
+    </div>
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-primary btn-sm" (click)="activeModal.close('Close click')">Save</button>
+    <button type="button" class="btn btn-secondary btn-sm" (click)="activeModal.dismiss('Close click')">Cancel</button>
+</div>

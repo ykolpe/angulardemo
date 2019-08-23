@@ -1,0 +1,177 @@
+<div class="container-fluid">
+  <h2>
+    <a [routerLink]="['/rules']" [routerLinkActive]="['active']">Rules</a> <small> <i class="fa fa-caret-right"></i> 
+    <span>{{editRule.RuleName}}</span>
+    </small>
+  </h2>
+  <div class="card">
+    <div class="card-block">
+		<div class="card-block">
+			<div class="form-group row">
+				<label for="example-text-input" class="col-2 col-form-label text-right">Rule Name:</label>
+				<div class="col-4">
+					<input class="form-control" type="text" [(ngModel)]="editRule.RuleName" id="ruleName" disabled="disabled">
+				</div>
+			</div>
+			<div class="form-group row">
+				<label for="example-text-input" class="col-2 col-form-label text-right">Status:</label>
+				<div class="col-4">
+					<input class="form-control" type="text" [(ngModel)]="editRule.Status" id="rulestatus" disabled="disabled">
+				</div>
+			</div>
+			<div class="form-group row">
+				<label for="example-text-input" class="col-2 col-form-label text-right">Created By:</label>
+				<div class="col-4">
+					<input class="form-control" type="text" [(ngModel)]="editRule.CreatedBy" id="createdBy" disabled="disabled">
+				</div>
+			</div>
+			<div class="form-group row">
+				<label for="example-text-input" class="col-2 col-form-label text-right">Created Date:</label>
+				<div class="col-4">
+					<input class="form-control" type="text" [(ngModel)]="editRule.CreatedDate" id="createdDate" disabled="disabled">
+				</div>
+			</div>
+			<div class="form-group row">
+				<label for="example-text-input" class="col-2 col-form-label text-right">Description:</label>
+				<div class="col-6">
+					<textarea class="form-control" type="text" [(ngModel)]="editRule.RuleDescription" id="description" #description="ngModel"></textarea>
+				</div>
+			</div>
+			<div class="form-group row">
+				<label for="example-text-input" class="col-2 col-form-label text-right">Justification:</label>
+				<div class="col-6">
+					<textarea class="form-control" type="text" [(ngModel)]="editRule.Justification" id="justification" #justification="ngModel"></textarea>
+				</div>
+			</div>
+			<div *ngFor="let alert of alerts" class="{{ cssClass(alert) }} alert-dismissable">
+				{{alert.message}}
+				<a class="close" (click)="removeAlert(alert)">&times;</a>
+			</div>
+			<div class="form-group row">
+				<label for="example-text-input" class="col-2 col-form-label text-right"></label>
+				<div class="col-6">
+					<button class="btn btn-primary" [disabled]="!(justification.dirty || description.dirty)" (click)="save()">Save</button>
+					<button class="btn btn-primary" [disabled]="justification.dirty || description.dirty" (click)="approve(detail)">{{editRule.Status=='Approved'?'Unapprove':'Approve'}}</button>
+					<button class="btn btn-secondary" (click)="cancel()">Cancel</button>
+				</div>
+			</div>
+		</div>
+    </div>
+  </div>
+  <div class="card">
+      <div class="card-block">
+          <div class="card-block">
+              <button class="btn btn-primary" (click)="newDetail(addruledetailcontent)">New Detail</button>
+          </div>
+          <label for="power">Rule Details <small *ngIf="loadingRuleandDetails"><i class="fa fa-spin fa-spinner"></i><span class="sr-only">Loading...</span></small></label>
+          <table class="table table-condensed table-striped table-hover table-responsive">
+              <thead class="blue-grey lighten-4">
+                  <tr>
+                      <th *ngFor="let column of ruleDetailcolumns" [ngClass]="column.styleClass">
+                          <a role="button" (click)="changeSort(column.field)">{{column.label}}</a>
+                          <i class="fa" [ngClass]="{'fa-angle-up': sortOrder.direction == 'asc' && sortOrder.property == column.field, 'fa-angle-down': sortOrder.direction == 'desc'  && sortOrder.property == column.field}"></i>
+                      </th>
+                      <th>
+                          Edit
+                      </th>
+                      <th>
+                          Delete
+                      </th>
+                  </tr>
+              </thead>
+              <tbody>
+                  <tr *ngIf="editRule.details.length == 0">
+                      <td colspan="11">
+                          <h3>No rule details defined.</h3>
+                      </td>
+                  </tr>
+                  <tr *ngFor="let detail of editRule.details | paginate : { itemsPerPage:10, currentPage: p, totalItems: totalItems } ">
+                      <td>{{detail.MCU}}</td>
+                      <td>{{detail.OBJ}}</td>
+                      <td>{{detail.SUB}}</td>
+                      <td>{{detail.AssetID}}</td>
+                      <td>{{detail.SubLedger}}</td>
+                      <td>{{detail.Percentage}}</td>
+                      <td>
+                          <button type="button" class="btn btn-secondary btn-sm" (click)="editDetail(addruledetailcontent, detail)">Edit</button>
+                      </td>
+                      <td>
+                          <button type="button" class="btn btn-secondary btn-sm" (click)="deleteDetail(detail)">Delete</button>
+                      </td>
+                  </tr>
+              </tbody>
+          </table>
+      </div>
+      <div>
+          <pagination-controls (pageChange)="p = getServerData($event)"></pagination-controls>
+      </div>
+  </div>
+</div>
+<ng-template #addruledetailcontent let-s="close" let-d="dismiss">
+    <div class="modal-header">
+        <h4 class="modal-title">{{DetailsTitle}}</h4>
+        <button type="button" class="close" aria-label="Close" (click)="activeModal.dismiss('Cross click')">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    <div class="modal-body">
+		<div class="form-group row">
+			<label for="example-text-input" class="col-4 col-form-label text-right">Business Unit:</label>
+			<div class="col-8">
+				<input class="form-control" type="text" required [(ngModel)]="editDetailData.MCU" id="budgetunit" #budgetunit="ngModel">
+				<div *ngIf="budgetunit.errors && (budgetunit.dirty || budgetunit.touched)" class="alert alert-danger">
+					<div [hidden]="!budgetunit.errors.required">
+						Business Unit is required!
+					</div>
+				</div>
+			</div>
+			
+		</div>
+		<div class="form-group row">
+			<label for="example-text-input" class="col-4 col-form-label text-right">Object:</label>
+			<div class="col-8">
+				<input class="form-control" type="text" required [(ngModel)]="editDetailData.OBJ" id="object" #object="ngModel">
+				<div *ngIf="object.errors && (object.dirty || object.touched)" class="alert alert-danger">
+					<div [hidden]="!object.errors.required">
+						Object is required!
+					</div>
+				</div>
+			</div>
+			
+		</div>
+		<div class="form-group row">
+			<label for="example-text-input" class="col-4 col-form-label text-right">Phase/WF:</label>
+			<div class="col-8">
+				<input class="form-control" type="text" required [(ngModel)]="editDetailData.SUB" id="phaseWF" #phaseWF="ngModel">
+				<!--<div *ngIf="phaseWF.errors && (phaseWF.dirty || phaseWF.touched)" class="alert alert-danger">
+					<div [hidden]="!phaseWF.errors.required">
+						Phase/WF is required!
+					</div>
+				</div>-->
+			</div>
+			
+		</div>
+        <div class="form-group row">
+            <label for="example-text-input" class="col-4 col-form-label text-right">Asset ID:</label>
+            <div class="col-8">
+                <input class="form-control" type="text" [(ngModel)]="editDetailData.AssetID" id="AssetID">
+            </div>
+        </div>
+        <div class="form-group row">
+            <label for="example-text-input" class="col-4 col-form-label text-right">Grant ID:</label>
+            <div class="col-8">
+                <input class="form-control" type="text" [(ngModel)]="editDetailData.SubLedger" id="SubLedger">
+            </div>
+        </div>
+        <div class="form-group row">
+            <label for="example-text-input" class="col-4 col-form-label text-right">Percentage:</label>
+            <div class="col-8">
+                <input class="form-control" type="number" [(ngModel)]="editDetailData.Percentage" id="Percentage">
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" [disabled]="budgetunit.invalid || object.invalid" class="btn btn-primary btn-sm"  (click)="s('newDetail click')">Save</button>
+        <button type="button" class="btn btn-secondary btn-sm"  (click)="d('Close click')">Cancel</button>
+    </div>
+</ng-template>
